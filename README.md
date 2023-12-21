@@ -13,9 +13,6 @@ After running `cargo add embed`, you can do:
 ```rs
 let contents: String = embed::string!("path/to/file.txt");
 let bytes: Vec<u8> = embed::bytes!("path/to/image.png");
-
-let dir: embed::Dir = embed::dir!("path/to/dir");
-
 ```
 
 ## License
