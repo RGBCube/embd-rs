@@ -9,8 +9,8 @@ On release mode it falls back to `include_str!`, `include_bytes!` and `include_d
 ## Usage
 
 ```rs
-let contents: String = embed::string!("path/to/file.txt");
-let bytes: Vec<u8> = embed::bytes!("path/to/image.png");
+let contents: Cow<'_, str> = embed::string!("path/to/file.txt");
+let bytes: Cow<'_, [u8]> = embed::bytes!("path/to/image.png");
 ```
 
 ## License

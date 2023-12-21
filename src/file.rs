@@ -46,7 +46,7 @@ macro_rules! bytes {
                 .expect("embed: file has no parent")
                 .join($path);
 
-            Cow::<'static, str>::Owned(fs::read_to_string(&file).unwrap_or_else(|error| {
+            Cow::<'static, [u8]>::Owned(fs::read(&file).unwrap_or_else(|error| {
                 panic!(
                     "embed: failed to read file {file}: {error}",
                     file = file.display()
