@@ -8,8 +8,6 @@ On release mode it falls back to `include_str!`, `include_bytes!` and `include_d
 
 ## Usage
 
-After running `cargo add embed`, you can do:
-
 ```rs
 let contents: String = embed::string!("path/to/file.txt");
 let bytes: Vec<u8> = embed::bytes!("path/to/image.png");
