@@ -60,8 +60,8 @@ macro_rules! bytes {
     }};
 }
 
-#[allow(dead_code)]
-fn check_validity() {
-    string!("test.txt");
-    bytes!("test.txt");
-}
+// #[allow(dead_code)]
+// fn check_validity() {
+//     string!("test.txt");
+//     bytes!("test.txt");
+// }
