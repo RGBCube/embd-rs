@@ -1,11 +1,14 @@
 *
 
-!src/
+!embed/
+!embed/src/
+
+!macros/
+!macros/src/
 
 !.gitignore
 
-!Cargo.lock
-
+!*.lock
 !*.md
 !*.rs
 !*.toml
