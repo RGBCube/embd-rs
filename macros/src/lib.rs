@@ -3,7 +3,8 @@ use std::{
     path::PathBuf,
 };
 
-use proc_macro::TokenStream;
+use proc_macro as pm1;
+use proc_macro2::TokenStream;
 use quote::quote;
 use syn::{
     parse_macro_input,
@@ -11,7 +12,7 @@ use syn::{
 };
 
 #[proc_macro]
-pub fn __include_dir(tokens: TokenStream) -> TokenStream {
+pub fn __include_dir(tokens: pm1::TokenStream) -> pm1::TokenStream {
     let path = parse_macro_input!(tokens as LitStr).value();
 
     let path = PathBuf::from(path)
@@ -27,12 +28,13 @@ pub fn __include_dir(tokens: TokenStream) -> TokenStream {
         vec![#(#children),*]
     };
 
-    TokenStream::from(quote! {
+    (quote! {
         ::embed::Dir {
             children: #children_tokens,
             path: ::std::path::PathBuf::from(#path_str),
         }
     })
+    .into()
 }
 
 fn read_dir(path: &PathBuf) -> Vec<TokenStream> {
@@ -50,7 +52,7 @@ fn read_dir(path: &PathBuf) -> Vec<TokenStream> {
             .to_str()
             .expect("Failed to get the string representation of PathBuf");
 
-        let filetype = fs::metadata(path)
+        let filetype = fs::metadata(&path)
             .expect("Failed to get file metadata")
             .file_type();
 
