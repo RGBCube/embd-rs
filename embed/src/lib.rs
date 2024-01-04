@@ -1,5 +1,3 @@
-#![cfg(procmacro2_semver_exempt)]
-
 use std::{
     borrow::Cow,
     fs,
@@ -29,15 +27,13 @@ pub fn __string_runtime(neighbor: &str, path: &str) -> String {
 #[macro_export]
 macro_rules! string {
     ($path:literal) => {{
-        use ::std::borrow::Cow;
-
         #[cfg(debug_assertions)]
         {
-            Cow::Owned(::embed::__string_runtime(file!(), $path))
+            ::std::borrow::Cow::Owned(::embed::__string_runtime(file!(), $path))
         }
         #[cfg(not(debug_assertions))]
         {
-            Cow::Borrowed(include_str!($path))
+            ::std::borrow::Cow::Borrowed(include_str!($path))
         }
     }};
 }
@@ -90,7 +86,7 @@ pub enum DirEntry {
 #[derive(Debug, Clone)]
 pub struct Dir {
     /// The entries the directory houses.
-    pub children: Vec<DirEntry>,
+    pub children: Cow<'static, [DirEntry]>,
     /// The absolute path of the directory.
     pub path: Cow<'static, Path>,
 }
@@ -100,7 +96,8 @@ impl Dir {
     pub fn flatten(self) -> Vec<File> {
         let mut entries = Vec::new();
 
-        for child in self.children {
+        for child in self.children.into_owned() {
+            // TODO: Eliminate allocation.
             match child {
                 DirEntry::File(file) => entries.push(file),
                 DirEntry::Dir(dir) => entries.append(&mut dir.flatten()),
@@ -136,7 +133,7 @@ fn read_dir(directory: &Path) -> Vec<DirEntry> {
         );
 
         if filetype.is_dir() {
-            let children = read_dir(path.as_ref());
+            let children = Cow::Owned(read_dir(path.as_ref()));
 
             entries.push(DirEntry::Dir(Dir { children, path }))
         } else if filetype.is_file() {
@@ -161,8 +158,8 @@ pub fn __dir_runtime(neighbor: &str, path: &str) -> Dir {
     let children = read_dir(&directory);
 
     Dir {
-        children,
-        path: Cow::Owned(directory),
+        children: children.into(),
+        path: directory.into(),
     }
 }
 

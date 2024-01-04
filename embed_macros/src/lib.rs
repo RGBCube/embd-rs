@@ -1,5 +1,3 @@
-#![cfg(procmacro2_semver_exempt)]
-
 use std::{
     fs,
     path::PathBuf,
@@ -38,9 +36,10 @@ impl ToTokens for TokenVec {
     fn to_tokens(&self, tokens: &mut TokenStream) {
         let inner = &self.0;
 
-        tokens.extend(quote! {
-            vec![#(#inner),*]
-        });
+        tokens.extend(quote! {{
+            const CHILDREN: &[::embed::DirEntry] = &[#(#inner),*]; // FIXME: Not const.
+            ::std::borrow::Cow::Borrowed(CHILDREN)
+        }});
     }
 }
 

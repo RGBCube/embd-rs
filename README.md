@@ -4,10 +4,25 @@ A super simple file and directory embedding crate,
 that loads files from the filesystem in debug mode,
 allowing for quick edit-and-test cycles without compilation.
 
+It is also super efficient, and does not heap allocate when the
+files are embedded on release mode by utilizing `std::borrow::Cow`.
+
 On release mode it falls back to `include_str!`, `include_bytes!`
-and our own custom `include_dir!` implementation.
+and our own custom `include_dir!`-like implementation.
 
 ## Usage
+
+Add this to your Cargo.toml:
+
+```toml
+[dependencies]
+embed = { git = "https://github.com/RGBCube/embed-rs" }
+
+[patch.crates-io]
+proc-macro2 = { git = "https://github.com/RGBCube/proc-macro2" }
+```
+
+Then you can use this crate as so:
 
 ```rs
 let contents: Cow<'_, str> = embed::string!("path/to/file.txt");
@@ -16,6 +31,9 @@ let bytes: Cow<'_, [u8]> = embed::bytes!("path/to/image.png");
 let dir: embed::Dir = embed::dir!("path/to");
 let files: Vec<embed::File> = dir.flatten();
 ```
+
+I am not sure what name to publish this
+crate in, lmk if you find a good one.
 
 ## License
 
