@@ -169,8 +169,10 @@ pub fn __dir_runtime(neighbor: &str, path: &str) -> Dir {
         .canonicalize()
         .expect("Failed to canonicalize path");
 
+    let children = read_dir(&directory);
+
     Dir {
-        children: read_dir(&directory),
+        children,
         path: directory,
     }
 }

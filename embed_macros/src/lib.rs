@@ -6,64 +6,72 @@ use std::{
     path::PathBuf,
 };
 
-use proc_macro as pm1;
+use proc_macro::{
+    self as pm1,
+    TokenStream,
+};
 use proc_macro2::TokenStream;
-use quote::quote;
+use quote::{
+    quote,
+    ToTokens,
+};
 use syn::{
     parse_macro_input,
     spanned::Spanned,
     LitStr,
 };
 
-#[proc_macro]
-pub fn dir(input: pm1::TokenStream) -> pm1::TokenStream {
-    if false {
-        let path = parse_macro_input!(input as LitStr).value();
+impl ToTokens for PathBuf {
+    fn to_tokens(&self, tokens: &mut TokenStream) {
+        let raw = self
+            .as_str()
+            .expect("Failed to get the string representation of PathBuf");
 
-        return quote! {
-            ::embed::__include_dir_runtime(file!(), #path)
-        }
-        .into();
+        tokens.append(quote! {
+            ::std::path::PathBuf::from(#raw)
+        });
     }
+}
 
-    let caller = dbg!(TokenStream::from(input.clone()).span().source_file().path());
-
-    let input2 = input.clone();
-    let path = parse_macro_input!(input2 as LitStr).value();
-
-    let path = caller
-        .parent()
-        .expect("Failed to get the parent of file")
-        .join(path);
-
-    let path_str = path
-        .to_str()
-        .expect("Failed to get the string representation of PathBuf");
-
-    if path_str.ends_with(".") {
-        return syn::Error::new_spanned(
-            TokenStream::from(input),
-            "Can't embed current file as it is not a directory",
-        )
-        .to_compile_error()
-        .into();
+impl ToTokens for Vec<TokenStream> {
+    fn to_tokens(&self, tokens: &mut TokenStream) {
+        tokens.append(quote! {
+            vec![#(#self),*]
+        });
     }
+}
 
-    let children = read_dir(&path, &path);
-    let children_tokens = quote! {
-        vec![#(#children),*]
+pub fn dir_debug(input: pm1::TokenStream) -> pm1::TokenStream {
+    let path = parse_macro_input!(input as LitStr).value();
+
+    quote! {
+        ::embed::__include_dir_runtime(file!(), #path)
     };
+}
+
+pub fn dir_release(input: pm1::TokenStream) -> pm1::TokenStream {
+    let neigbor = TokenStream::from(input.clone()).span().source_file().path();
+    let path = parse_macro_input!(input as LitStr).value();
+
+    let base = neighbor.parent().expect("Failed to get the parent of file");
+
+    let directory = base
+        .join(path)
+        .canonicalize()
+        .expect("Failed to canonicalize path");
+
+    let children = read_dir(&directory);
 
     quote! {
         ::embed::Dir {
-            children: #children_tokens,
-            path: ::std::path::PathBuf::from(#path_str),
+            children: #children,
+            path: #directory,
         }
     }
     .into()
 }
 
-fn read_dir(base: &PathBuf, path: &PathBuf) -> Vec<TokenStream> {
+fn read_dir(directory: &PathBuf) -> Vec<DirEntry> {
     let mut entries = Vec::new();
 
     for entry in fs::read_dir(path).expect("Failed to list directory contents") {
@@ -71,33 +79,24 @@ fn read_dir(base: &PathBuf, path: &PathBuf) -> Vec<TokenStream> {
 
         let path = entry.path();
 
-        let path_str = path
-            .strip_prefix(base)
-            .expect("Failed to strip prefix of path")
-            .to_str()
-            .expect("Failed to get the string representation of PathBuf");
-
         let filetype = fs::metadata(&path)
             .expect("Failed to get file metadata")
             .file_type();
 
         if filetype.is_dir() {
-            let children = read_dir(base, &path);
-            let children_tokens = quote! {
-                vec![#(#children),*]
-            };
+            let children = read_dir(&path);
 
             entries.push(quote! {
                 ::embed::DirEntry::Dir(::embed::Dir {
-                    children: #children_tokens,
-                    path: ::std::path::PathBuf::from(#path_str),
+                    children: #children,
+                    path: #path,
                 })
             });
         } else if filetype.is_file() {
             entries.push(quote! {
                 ::embed::DirEntry::File(::embed::File {
                     content: include_bytes!(#path_str).to_vec(),
-                    path: ::std::path::PathBuf::from(#path_str),
+                    path: #path,
                 })
             });
         }
