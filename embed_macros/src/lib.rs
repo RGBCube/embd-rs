@@ -95,7 +95,7 @@ fn read_dir(directory: &PathBuf) -> Vec<DirEntry> {
         } else if filetype.is_file() {
             entries.push(quote! {
                 ::embed::DirEntry::File(::embed::File {
-                    content: include_bytes!(#path_str).to_vec(),
+                    content: ::std::borrow::Cow::Borrowed(include_bytes!(#path_str)),
                     path: #path,
                 })
             });

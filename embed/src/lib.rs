@@ -1,6 +1,7 @@
 #![cfg(procmacro2_semver_exempt)]
 
 use std::{
+    borrow::Cow,
     fs,
     path::{
         Path,
@@ -119,7 +120,7 @@ impl Dir {
 #[derive(Debug, Clone)]
 pub struct File {
     /// The content of the file in bytes.
-    pub content: Vec<u8>,
+    pub content: Cow<'static, [u8]>,
     /// The absolute path of the file.
     pub path: PathBuf,
 }
@@ -149,7 +150,7 @@ fn read_dir(path: &PathBuf) -> Vec<DirEntry> {
 
             entries.push(DirEntry::Dir(Dir { children, path }))
         } else if filetype.is_file() {
-            let content = fs::read(&path).expect("Failed to read file contents");
+            let content = Cow::Owned(fs::read(&path).expect("Failed to read file contents"));
 
             entries.push(DirEntry::File(File { content, path }))
         }
