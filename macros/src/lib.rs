@@ -42,6 +42,16 @@ pub fn __include_dir(input: pm1::TokenStream) -> pm1::TokenStream {
         .expect("Failed to get the parent of file")
         .join(path);
 
+    let path = if !path.ends_with("..") {
+        path
+    } else {
+        path.parent().unwrap().to_path_buf()
+    };
+
+    let path_str = path
+        .to_str()
+        .expect("Failed to get the string representation of PathBuf");
+
     let children = read_dir(&path, &path);
     let children_tokens = quote! {
         vec![#(#children),*]
@@ -50,7 +60,7 @@ pub fn __include_dir(input: pm1::TokenStream) -> pm1::TokenStream {
     (quote! {
         ::embed::Dir {
             children: #children_tokens,
-            path: ::std::path::PathBuf::from(""),
+            path: ::std::path::PathBuf::from(#path_str),
         }
     })
     .into()
