@@ -1,3 +1,5 @@
+#![cfg(procmacro2_semver_exempt)]
+
 mod dir;
 mod file;
 
