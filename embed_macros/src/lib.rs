@@ -1,6 +1,7 @@
 #![cfg(procmacro2_semver_exempt)]
 
 use std::{
+    env,
     fs,
     path::PathBuf,
 };
@@ -14,10 +15,18 @@ use syn::{
     LitStr,
 };
 
-#[doc(hidden)]
 #[proc_macro]
-pub fn __include_dir(input: pm1::TokenStream) -> pm1::TokenStream {
-    let caller = TokenStream::from(input).span().source_file().path();
+pub fn dir(input: pm1::TokenStream) -> pm1::TokenStream {
+    if false {
+        let path = parse_macro_input!(input as LitStr).value();
+
+        return quote! {
+            ::embed::__include_dir_runtime(file!(), #path)
+        }
+        .into();
+    }
+
+    let caller = dbg!(TokenStream::from(input.clone()).span().source_file().path());
 
     let input2 = input.clone();
     let path = parse_macro_input!(input2 as LitStr).value();
@@ -26,12 +35,6 @@ pub fn __include_dir(input: pm1::TokenStream) -> pm1::TokenStream {
         .parent()
         .expect("Failed to get the parent of file")
         .join(path);
-
-    let path = if path.ends_with("..") {
-        path.parent().unwrap().to_path_buf()
-    } else {
-        path
-    };
 
     let path_str = path
         .to_str()
@@ -51,12 +54,12 @@ pub fn __include_dir(input: pm1::TokenStream) -> pm1::TokenStream {
         vec![#(#children),*]
     };
 
-    (quote! {
+    quote! {
         ::embed::Dir {
             children: #children_tokens,
             path: ::std::path::PathBuf::from(#path_str),
         }
-    })
+    }
     .into()
 }
 
@@ -85,15 +88,15 @@ fn read_dir(base: &PathBuf, path: &PathBuf) -> Vec<TokenStream> {
             };
 
             entries.push(quote! {
-                ::embed::DirEntry(::embed::Dir {
+                ::embed::DirEntry::Dir(::embed::Dir {
                     children: #children_tokens,
                     path: ::std::path::PathBuf::from(#path_str),
                 })
             });
         } else if filetype.is_file() {
             entries.push(quote! {
-                ::embed::DirEntry(::embed::File {
-                    content: include_bytes!(#path_str),
+                ::embed::DirEntry::File(::embed::File {
+                    content: include_bytes!(#path_str).to_vec(),
                     path: ::std::path::PathBuf::from(#path_str),
                 })
             });

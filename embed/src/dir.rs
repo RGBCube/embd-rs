@@ -39,6 +39,7 @@ pub struct File {
 }
 
 fn read_dir(path: &PathBuf) -> Vec<DirEntry> {
+    dbg!(path);
     let mut entries = Vec::new();
 
     for entry in fs::read_dir(path).expect("Failed to list directory contents") {
@@ -71,18 +72,4 @@ pub fn __include_dir_runtime(caller: &str, path: &str) -> Dir {
     let children = read_dir(&path);
 
     Dir { children, path }
-}
-
-#[macro_export]
-macro_rules! dir {
-    ($path:literal) => {{
-        #[cfg(debug_assertions)]
-        {
-            ::embed::__include_dir_runtime(file!(), $path)
-        }
-        #[cfg(not(debug_assertions))]
-        {
-            ::embed::__include_dir!($path)
-        }
-    }};
 }
