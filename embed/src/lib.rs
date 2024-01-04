@@ -9,8 +9,6 @@ use std::{
     },
 };
 
-pub use embed_macros::__dir as dir;
-
 #[doc(hidden)]
 pub fn __string_runtime(neighbor: &str, path: &str) -> String {
     let base = Path::new(neighbor)
@@ -172,3 +170,16 @@ pub fn __dir_runtime(neighbor: &str, path: &str) -> Dir {
         path: directory,
     }
 }
+
+/// Embed a directories contents.
+/// The content value of File will be Borrowed on release,
+/// and Owned on debug.
+///
+/// # Example
+///
+/// ```
+/// fn main() {
+///     let content = embed::dir!("../assets");
+/// }
+/// ```
+pub use embed_macros::__dir as dir;
