@@ -5,11 +5,13 @@ use std::{
     path::PathBuf,
 };
 
+#[derive(Debug, Clone)]
 pub enum DirEntry {
     Dir(Dir),
     File(File),
 }
 
+#[derive(Debug, Clone)]
 pub struct Dir {
     pub children: Vec<DirEntry>,
     pub path: PathBuf,
@@ -30,6 +32,7 @@ impl Dir {
     }
 }
 
+#[derive(Debug, Clone)]
 pub struct File {
     pub content: Vec<u8>,
     pub path: PathBuf,
@@ -70,22 +73,15 @@ pub fn __include_dir(caller: &str, path: &str) -> Dir {
 }
 
 #[macro_export]
-macro_rules! __dir {
-    ($caller:literal, $path:literal) => {{
+macro_rules! dir {
+    ($path:literal) => {{
         #[cfg(debug_assertions)]
         {
-            ::embed::__include_dir($caller, $path)
+            ::embed::__include_dir(file!(), $path)
         }
         #[cfg(not(debug_assertions))]
         {
-            ::embed_macros::__include_dir!($caller, $path)
+            ::embed_macros::__include_dir!($path)
         }
     }};
-}
-
-#[macro_export]
-macro_rules! dir {
-    ($path:literal) => {
-        ::embed::__dir!(file!(), $path)
-    };
 }

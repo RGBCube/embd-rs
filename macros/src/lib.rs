@@ -1,3 +1,5 @@
+#![cfg(procmacro2_semver_exempt)]
+
 use std::{
     fs,
     path::PathBuf,
@@ -7,38 +9,19 @@ use proc_macro as pm1;
 use proc_macro2::TokenStream;
 use quote::quote;
 use syn::{
-    parse::{
-        Parse,
-        ParseStream,
-    },
     parse_macro_input,
+    spanned::Spanned,
     LitStr,
-    Token,
 };
-
-struct TwoStrArgs {
-    caller: String,
-    path: String,
-}
-
-impl Parse for TwoStrArgs {
-    fn parse(input: ParseStream) -> syn::Result<Self> {
-        let caller = input.parse::<LitStr>()?.value();
-
-        input.parse::<Token![,]>()?;
-
-        let path = input.parse::<LitStr>()?.value();
-
-        Ok(Self { caller, path })
-    }
-}
 
 #[proc_macro]
 pub fn __include_dir(input: pm1::TokenStream) -> pm1::TokenStream {
-    let input2 = input.clone();
-    let TwoStrArgs { caller, path } = parse_macro_input!(input2 as TwoStrArgs);
+    let caller = TokenStream::from(input).span().source_file().path();
 
-    let path = PathBuf::from(caller)
+    let input2 = input.clone();
+    let path = parse_macro_input!(input2 as LitStr).value();
+
+    let path = caller
         .parent()
         .expect("Failed to get the parent of file")
         .join(path);
