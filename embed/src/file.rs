@@ -1,11 +1,11 @@
 #[macro_export]
 macro_rules! string {
     ($path:literal) => {{
-        use std::borrow::Cow;
+        use ::std::borrow::Cow;
 
         #[cfg(debug_assertions)]
         {
-            use std::{
+            use ::std::{
                 fs,
                 path::Path,
             };
@@ -32,11 +32,11 @@ macro_rules! string {
 #[macro_export]
 macro_rules! bytes {
     ($path:literal) => {{
-        use std::borrow::Cow;
+        use ::std::borrow::Cow;
 
         #[cfg(debug_assertions)]
         {
-            use std::{
+            use ::std::{
                 fs,
                 path::Path,
             };
