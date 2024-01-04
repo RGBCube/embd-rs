@@ -27,7 +27,7 @@ impl ToTokens for PathBuf2 {
             .expect("Failed to get the string representation of PathBuf");
 
         tokens.extend(quote! {
-            ::std::path::PathBuf::from(#raw)
+            ::std::borrow::Cow::Borrowed(::std::path::Path::new(#raw))
         });
     }
 }

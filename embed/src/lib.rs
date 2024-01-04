@@ -3,10 +3,7 @@
 use std::{
     borrow::Cow,
     fs,
-    path::{
-        Path,
-        PathBuf,
-    },
+    path::Path,
 };
 
 #[doc(hidden)]
@@ -97,7 +94,7 @@ pub struct Dir {
     /// The entries the directory houses.
     pub children: Vec<DirEntry>,
     /// The absolute path of the directory.
-    pub path: PathBuf,
+    pub path: Cow<'static, Path>,
 }
 
 impl Dir {
@@ -122,10 +119,10 @@ pub struct File {
     /// The content of the file in bytes.
     pub content: Cow<'static, [u8]>,
     /// The absolute path of the file.
-    pub path: PathBuf,
+    pub path: Cow<'static, Path>,
 }
 
-fn read_dir(path: &PathBuf) -> Vec<DirEntry> {
+fn read_dir(path: &Path) -> Vec<DirEntry> {
     let mut entries = Vec::new();
 
     for entry in fs::read_dir(path).expect("Failed to list directory contents") {
@@ -133,13 +130,15 @@ fn read_dir(path: &PathBuf) -> Vec<DirEntry> {
 
         let filetype = entry.file_type().expect("Failed to read entry filetype");
 
-        let path = entry
-            .path()
-            .canonicalize()
-            .expect("Failed to canonicalize path");
+        let path = Cow::Owned::<'static, Path>(
+            entry
+                .path()
+                .canonicalize()
+                .expect("Failed to canonicalize path"),
+        );
 
         if filetype.is_dir() {
-            let children = read_dir(&path);
+            let children = read_dir(path.as_ref());
 
             entries.push(DirEntry::Dir(Dir { children, path }))
         } else if filetype.is_file() {
@@ -167,7 +166,7 @@ pub fn __dir_runtime(neighbor: &str, path: &str) -> Dir {
 
     Dir {
         children,
-        path: directory,
+        path: Cow::Owned(directory),
     }
 }
 
