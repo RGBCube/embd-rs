@@ -14,6 +14,7 @@ use syn::{
     LitStr,
 };
 
+#[doc(hidden)]
 #[proc_macro]
 pub fn __include_dir(input: pm1::TokenStream) -> pm1::TokenStream {
     let caller = TokenStream::from(input).span().source_file().path();

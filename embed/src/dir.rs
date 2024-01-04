@@ -61,7 +61,8 @@ fn read_dir(path: &PathBuf) -> Vec<DirEntry> {
     entries
 }
 
-pub fn __include_dir(caller: &str, path: &str) -> Dir {
+#[doc(hidden)]
+pub fn __include_dir_runtime(caller: &str, path: &str) -> Dir {
     let path = PathBuf::from(caller)
         .parent()
         .expect("Failed to get the parent of file")
@@ -77,11 +78,11 @@ macro_rules! dir {
     ($path:literal) => {{
         #[cfg(debug_assertions)]
         {
-            ::embed::__include_dir(file!(), $path)
+            ::embed::__include_dir_runtime(file!(), $path)
         }
         #[cfg(not(debug_assertions))]
         {
-            ::embed_macros::__include_dir!($path)
+            ::embed::__include_dir!($path)
         }
     }};
 }
