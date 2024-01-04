@@ -12,12 +12,12 @@ macro_rules! string {
 
             let file = Path::new(file!())
                 .parent()
-                .expect("embed: file has no parent")
+                .expect("embed: Failed to get the parent of file")
                 .join($path);
 
             Cow::<'static, str>::Owned(fs::read_to_string(&file).unwrap_or_else(|error| {
                 panic!(
-                    "embed: failed to read file {file}: {error}",
+                    "embed: Failed to read file {file}: {error}",
                     file = file.display()
                 )
             }))
@@ -43,7 +43,7 @@ macro_rules! bytes {
 
             let file = Path::new(file!())
                 .parent()
-                .expect("embed: file has no parent")
+                .expect("embed: Failed to get the parent of file")
                 .join($path);
 
             Cow::<'static, [u8]>::Owned(fs::read(&file).unwrap_or_else(|error| {
@@ -59,9 +59,3 @@ macro_rules! bytes {
         }
     }};
 }
-
-// #[allow(dead_code)]
-// fn check_validity() {
-//     string!("test.txt");
-//     bytes!("test.txt");
-// }

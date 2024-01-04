@@ -7,21 +7,42 @@ use proc_macro as pm1;
 use proc_macro2::TokenStream;
 use quote::quote;
 use syn::{
+    parse::{
+        Parse,
+        ParseStream,
+    },
     parse_macro_input,
     LitStr,
+    Token,
 };
 
+struct TwoStrArgs {
+    caller: String,
+    path: String,
+}
+
+impl Parse for TwoStrArgs {
+    fn parse(input: ParseStream) -> syn::Result<Self> {
+        let caller = input.parse::<LitStr>()?.value();
+
+        input.parse::<Token![,]>()?;
+
+        let path = input.parse::<LitStr>()?.value();
+
+        Ok(Self { caller, path })
+    }
+}
+
 #[proc_macro]
-pub fn __include_dir(tokens: pm1::TokenStream) -> pm1::TokenStream {
-    let path = parse_macro_input!(tokens as LitStr).value();
+pub fn __include_dir(input: pm1::TokenStream) -> pm1::TokenStream {
+    let TwoStrArgs { caller, path } = parse_macro_input!(input as TwoStrArgs);
 
-    let path = PathBuf::from(path);
+    let path = PathBuf::from(caller)
+        .parent()
+        .expect("Failed to get the parent of file")
+        .join(path);
 
-    let path_str = path
-        .to_str()
-        .expect("Failed to get the string representation of PathBuf");
-
-    let children = read_dir(&path);
+    let children = read_dir(&path, &path);
     let children_tokens = quote! {
         vec![#(#children),*]
     };
@@ -29,13 +50,13 @@ pub fn __include_dir(tokens: pm1::TokenStream) -> pm1::TokenStream {
     (quote! {
         ::embed::Dir {
             children: #children_tokens,
-            path: ::std::path::PathBuf::from(#path_str),
+            path: ::std::path::PathBuf::from(""),
         }
     })
     .into()
 }
 
-fn read_dir(path: &PathBuf) -> Vec<TokenStream> {
+fn read_dir(base: &PathBuf, path: &PathBuf) -> Vec<TokenStream> {
     let mut entries = Vec::new();
 
     for entry in fs::read_dir(path).expect("Failed to list directory contents") {
@@ -44,6 +65,8 @@ fn read_dir(path: &PathBuf) -> Vec<TokenStream> {
         let path = entry.path();
 
         let path_str = path
+            .strip_prefix(base)
+            .expect("Failed to strip prefix of path")
             .to_str()
             .expect("Failed to get the string representation of PathBuf");
 
@@ -52,7 +75,7 @@ fn read_dir(path: &PathBuf) -> Vec<TokenStream> {
             .file_type();
 
         if filetype.is_dir() {
-            let children = read_dir(&path);
+            let children = read_dir(base, &path);
             let children_tokens = quote! {
                 vec![#(#children),*]
             };
@@ -66,7 +89,7 @@ fn read_dir(path: &PathBuf) -> Vec<TokenStream> {
         } else if filetype.is_file() {
             entries.push(quote! {
                 ::embed::DirEntry(::embed::File {
-                    content: ::include_bytes!(#path_str),
+                    content: include_bytes!(#path_str),
                     path: ::std::path::PathBuf::from(#path_str),
                 })
             });
