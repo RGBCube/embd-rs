@@ -110,7 +110,6 @@ fn read_dir(base: &PathBuf, path: &PathBuf) -> Vec<TokenStream> {
             entries.push(quote! {
                 ::embed::DirEntry(::embed::File {
                     content: include_bytes!(#path_str),
-                    // content: include_bytes(#path_str),
                     path: ::std::path::PathBuf::from(#path_str),
                 })
             });

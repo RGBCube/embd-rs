@@ -70,16 +70,22 @@ pub fn __include_dir(caller: &str, path: &str) -> Dir {
 }
 
 #[macro_export]
-macro_rules! dir {
-    ($path:literal) => {{
+macro_rules! __dir {
+    ($caller:literal, $path:literal) => {{
         #[cfg(debug_assertions)]
         {
-            ::embed::__include_dir(file!(), $path)
+            ::embed::__include_dir($caller, $path)
         }
         #[cfg(not(debug_assertions))]
         {
-            ::embed_macros::__include_dir!(file!(), $path) // FIXME
-            // ::embed_macros::__include_dir!("embed/src/lib.rs", $path)
+            ::embed_macros::__include_dir!($caller, $path)
         }
     }};
+}
+
+#[macro_export]
+macro_rules! dir {
+    ($path:literal) => {
+        ::embed::__dir!(file!(), $path)
+    };
 }
