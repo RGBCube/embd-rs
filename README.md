@@ -14,6 +14,7 @@ let contents: Cow<'_, str> = embed::string!("path/to/file.txt");
 let bytes: Cow<'_, [u8]> = embed::bytes!("path/to/image.png");
 
 let dir: embed::Dir = embed::dir!("path/to");
+let files: Vec<embed::File> = dir.flatten();
 ```
 
 ## License
