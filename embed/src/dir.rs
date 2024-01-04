@@ -79,6 +79,7 @@ macro_rules! dir {
         #[cfg(not(debug_assertions))]
         {
             ::embed_macros::__include_dir!(file!(), $path) // FIXME
+            // ::embed_macros::__include_dir!("embed/src/lib.rs", $path)
         }
     }};
 }

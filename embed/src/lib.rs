@@ -5,5 +5,5 @@ mod file;
 pub use file::*;
 
 // fn expand() {
-//     dir!("")
+//     dir!(".")
 // }

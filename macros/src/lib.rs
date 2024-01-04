@@ -35,22 +35,32 @@ impl Parse for TwoStrArgs {
 
 #[proc_macro]
 pub fn __include_dir(input: pm1::TokenStream) -> pm1::TokenStream {
-    let TwoStrArgs { caller, path } = parse_macro_input!(input as TwoStrArgs);
+    let input2 = input.clone();
+    let TwoStrArgs { caller, path } = parse_macro_input!(input2 as TwoStrArgs);
 
     let path = PathBuf::from(caller)
         .parent()
         .expect("Failed to get the parent of file")
         .join(path);
 
-    let path = if !path.ends_with("..") {
-        path
-    } else {
+    let path = if path.ends_with("..") {
         path.parent().unwrap().to_path_buf()
+    } else {
+        path
     };
 
     let path_str = path
         .to_str()
         .expect("Failed to get the string representation of PathBuf");
+
+    if path_str.ends_with(".") {
+        return syn::Error::new_spanned(
+            TokenStream::from(input),
+            "Can't embed current file as it is not a directory",
+        )
+        .to_compile_error()
+        .into();
+    }
 
     let children = read_dir(&path, &path);
     let children_tokens = quote! {
@@ -100,6 +110,7 @@ fn read_dir(base: &PathBuf, path: &PathBuf) -> Vec<TokenStream> {
             entries.push(quote! {
                 ::embed::DirEntry(::embed::File {
                     content: include_bytes!(#path_str),
+                    // content: include_bytes(#path_str),
                     path: ::std::path::PathBuf::from(#path_str),
                 })
             });
