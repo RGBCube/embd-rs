@@ -8,24 +8,12 @@ use std::{
 
 #[doc(hidden)]
 pub fn __string_runtime(neighbor: &str, path: &str) -> String {
-    let base = Path::new(neighbor)
+    let file = Path::new(neighbor)
         .parent()
-        .expect("Failed to get the parent of file");
-
-    let file = base.join(path);
+        .expect("Failed to get the parent of file")
+        .join(path);
 
     fs::read_to_string(file).expect("Failed to read file")
-}
-
-#[doc(hidden)]
-pub fn __bytes_runtime(neighbor: &str, path: &str) -> Vec<u8> {
-    let base = Path::new(neighbor)
-        .parent()
-        .expect("Failed to get the parent of file");
-
-    let file = base.join(path);
-
-    fs::read(file).expect("Failed to read file")
 }
 
 /// Embed a files contents as a &str on release,
@@ -52,6 +40,16 @@ macro_rules! string {
             Cow::Borrowed(include_str!($path))
         }
     }};
+}
+
+#[doc(hidden)]
+pub fn __bytes_runtime(neighbor: &str, path: &str) -> Vec<u8> {
+    let file = Path::new(neighbor)
+        .parent()
+        .expect("Failed to get the parent of file")
+        .join(path);
+
+    fs::read(file).expect("Failed to read file")
 }
 
 /// Embed a files contents as a &[u8] on release,
@@ -122,10 +120,10 @@ pub struct File {
     pub path: Cow<'static, Path>,
 }
 
-fn read_dir(path: &Path) -> Vec<DirEntry> {
+fn read_dir(directory: &Path) -> Vec<DirEntry> {
     let mut entries = Vec::new();
 
-    for entry in fs::read_dir(path).expect("Failed to list directory contents") {
+    for entry in fs::read_dir(directory).expect("Failed to list directory contents") {
         let entry = entry.expect("Failed to read entry");
 
         let filetype = entry.file_type().expect("Failed to read entry filetype");
@@ -153,11 +151,9 @@ fn read_dir(path: &Path) -> Vec<DirEntry> {
 
 #[doc(hidden)]
 pub fn __dir_runtime(neighbor: &str, path: &str) -> Dir {
-    let base = Path::new(neighbor)
+    let directory = Path::new(neighbor)
         .parent()
-        .expect("Failed to get the parent of file");
-
-    let directory = base
+        .expect("Failed to get the parent of file")
         .join(path)
         .canonicalize()
         .expect("Failed to canonicalize path");
