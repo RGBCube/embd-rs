@@ -1,2 +1,2 @@
 [workspace]
-members = [ "embed", "macros" ]
+members = [ "embed", "embed_macros" ]

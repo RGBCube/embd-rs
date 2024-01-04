@@ -3,8 +3,8 @@
 !embed/
 !embed/src/
 
-!macros/
-!macros/src/
+!embed_macros/
+!embed_macros/src/
 
 !.gitignore
 
