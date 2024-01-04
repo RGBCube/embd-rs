@@ -1,15 +1,11 @@
 #![cfg(procmacro2_semver_exempt)]
 
 use std::{
-    env,
     fs,
     path::PathBuf,
 };
 
-use proc_macro::{
-    self as pm1,
-    TokenStream,
-};
+use proc_macro as pm1;
 use proc_macro2::TokenStream;
 use quote::{
     quote,
@@ -21,46 +17,74 @@ use syn::{
     LitStr,
 };
 
-impl ToTokens for PathBuf {
+struct PathBuf2(PathBuf);
+
+impl ToTokens for PathBuf2 {
     fn to_tokens(&self, tokens: &mut TokenStream) {
         let raw = self
-            .as_str()
+            .0
+            .to_str()
             .expect("Failed to get the string representation of PathBuf");
 
-        tokens.append(quote! {
+        tokens.extend(quote! {
             ::std::path::PathBuf::from(#raw)
         });
     }
 }
 
-impl ToTokens for Vec<TokenStream> {
+struct TokenVec(Vec<TokenStream>);
+
+impl ToTokens for TokenVec {
     fn to_tokens(&self, tokens: &mut TokenStream) {
-        tokens.append(quote! {
-            vec![#(#self),*]
+        let inner = &self.0;
+
+        tokens.extend(quote! {
+            vec![#(#inner),*]
         });
     }
 }
 
-pub fn dir_debug(input: pm1::TokenStream) -> pm1::TokenStream {
-    let path = parse_macro_input!(input as LitStr).value();
+#[proc_macro]
+pub fn __dir(input: pm1::TokenStream) -> pm1::TokenStream {
+    let input2 = input.clone();
+    let path = parse_macro_input!(input2 as LitStr).value();
+
+    let debug = dir_debug(&path);
+    let release = dir_release(input.into(), &path);
 
     quote! {
-        ::embed::__include_dir_runtime(file!(), #path)
-    };
+        {
+            #[cfg(debug_assertions)]
+            {
+                #debug
+            }
+            #[cfg(not(debug_assertions))]
+            {
+                #release
+            }
+        }
+    }
+    .into()
 }
 
-pub fn dir_release(input: pm1::TokenStream) -> pm1::TokenStream {
-    let neigbor = TokenStream::from(input.clone()).span().source_file().path();
-    let path = parse_macro_input!(input as LitStr).value();
+fn dir_debug(path: &str) -> TokenStream {
+    quote! {
+        ::embed::__dir_runtime(file!(), #path)
+    }
+}
+
+fn dir_release(input: TokenStream, path: &str) -> TokenStream {
+    let neighbor = TokenStream::from(input).span().source_file().path();
 
     let base = neighbor.parent().expect("Failed to get the parent of file");
 
-    let directory = base
-        .join(path)
-        .canonicalize()
-        .expect("Failed to canonicalize path");
+    let directory = PathBuf2(
+        base.join(path)
+            .canonicalize()
+            .expect("Failed to canonicalize path"),
+    );
 
-    let children = read_dir(&directory);
+    let children = read_dir(&directory.0);
 
     quote! {
         ::embed::Dir {
@@ -68,23 +92,22 @@ pub fn dir_release(input: pm1::TokenStream) -> pm1::TokenStream {
             path: #directory,
         }
     }
-    .into()
 }
 
-fn read_dir(directory: &PathBuf) -> Vec<DirEntry> {
+fn read_dir(directory: &PathBuf) -> TokenVec {
     let mut entries = Vec::new();
 
-    for entry in fs::read_dir(path).expect("Failed to list directory contents") {
+    for entry in fs::read_dir(directory).expect("Failed to list directory contents") {
         let entry = entry.expect("Failed to read entry");
 
-        let path = entry.path();
+        let path = PathBuf2(entry.path());
 
-        let filetype = fs::metadata(&path)
+        let filetype = fs::metadata(&path.0)
             .expect("Failed to get file metadata")
             .file_type();
 
         if filetype.is_dir() {
-            let children = read_dir(&path);
+            let children = read_dir(&path.0);
 
             entries.push(quote! {
                 ::embed::DirEntry::Dir(::embed::Dir {
@@ -93,6 +116,11 @@ fn read_dir(directory: &PathBuf) -> Vec<DirEntry> {
                 })
             });
         } else if filetype.is_file() {
+            let path_str = path
+                .0
+                .to_str()
+                .expect("Failed to get the string representation of PathBuf");
+
             entries.push(quote! {
                 ::embed::DirEntry::File(::embed::File {
                     content: ::std::borrow::Cow::Borrowed(include_bytes!(#path_str)),
@@ -102,5 +130,5 @@ fn read_dir(directory: &PathBuf) -> Vec<DirEntry> {
         }
     }
 
-    entries
+    TokenVec(entries)
 }

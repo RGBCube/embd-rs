@@ -9,6 +9,8 @@ use std::{
     },
 };
 
+pub use embed_macros::__dir as dir;
+
 #[doc(hidden)]
 pub fn __string_runtime(neighbor: &str, path: &str) -> String {
     let base = Path::new(neighbor)
@@ -123,13 +125,6 @@ pub struct File {
     pub content: Cow<'static, [u8]>,
     /// The absolute path of the file.
     pub path: PathBuf,
-}
-
-impl File {
-    /// Returns the content of the file as a String if it is valid UTF-8.
-    pub fn content_string(&self) -> Option<String> {
-        String::from_utf8(&self.content).ok()
-    }
 }
 
 fn read_dir(path: &PathBuf) -> Vec<DirEntry> {
