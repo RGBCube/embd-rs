@@ -42,10 +42,7 @@ fn read_dir(path: &PathBuf) -> Vec<DirEntry> {
         let entry = entry.expect("Failed to read entry");
 
         let filetype = entry.file_type().expect("Failed to read entry filetype");
-        let path = entry
-            .path()
-            .canonicalize()
-            .expect("Failed to get the canonical path of the DirEntry");
+        let path = entry.path();
 
         if filetype.is_dir() {
             let children = read_dir(&path);
@@ -62,9 +59,7 @@ fn read_dir(path: &PathBuf) -> Vec<DirEntry> {
 }
 
 pub fn __include_dir(path: &str) -> Dir {
-    let path = PathBuf::from(path)
-        .canonicalize()
-        .expect("Failed to get the canonical path of the DirEntry");
+    let path = PathBuf::from(path);
 
     let children = read_dir(&path);
 

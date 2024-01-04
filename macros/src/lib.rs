@@ -15,9 +15,7 @@ use syn::{
 pub fn __include_dir(tokens: pm1::TokenStream) -> pm1::TokenStream {
     let path = parse_macro_input!(tokens as LitStr).value();
 
-    let path = PathBuf::from(path)
-        .canonicalize()
-        .expect("Failed to get the canonical path of the DirEntry");
+    let path = PathBuf::from(path);
 
     let path_str = path
         .to_str()
@@ -43,10 +41,7 @@ fn read_dir(path: &PathBuf) -> Vec<TokenStream> {
     for entry in fs::read_dir(path).expect("Failed to list directory contents") {
         let entry = entry.expect("Failed to read entry");
 
-        let path = entry
-            .path()
-            .canonicalize()
-            .expect("Failed to get the canonical path of the DirEntry");
+        let path = entry.path();
 
         let path_str = path
             .to_str()
