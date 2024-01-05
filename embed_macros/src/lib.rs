@@ -1,6 +1,6 @@
 use std::{
     fs,
-    path::PathBuf,
+    path::Path,
 };
 
 use proc_macro as pm1;
@@ -15,21 +15,6 @@ use syn::{
     LitStr,
 };
 
-struct PathBuf2(PathBuf);
-
-impl ToTokens for PathBuf2 {
-    fn to_tokens(&self, tokens: &mut TokenStream) {
-        let raw = self
-            .0
-            .to_str()
-            .expect("Failed to get the string representation of PathBuf");
-
-        tokens.extend(quote! {
-            ::std::borrow::Cow::Borrowed(::std::path::Path::new(#raw))
-        });
-    }
-}
-
 struct TokenVec(Vec<TokenStream>);
 
 impl ToTokens for TokenVec {
@@ -37,8 +22,7 @@ impl ToTokens for TokenVec {
         let inner = &self.0;
 
         tokens.extend(quote! {{
-            const CHILDREN: &[::embed::DirEntry] = &[#(#inner),*]; // FIXME: Not const.
-            ::std::borrow::Cow::Borrowed(CHILDREN)
+            ::std::borrow::Cow::Borrowed(&[#(#inner),*])
         }});
     }
 }
@@ -77,53 +61,53 @@ fn dir_release(input: TokenStream, path: &str) -> TokenStream {
 
     let base = neighbor.parent().expect("Failed to get the parent of file");
 
-    let directory = PathBuf2(
-        base.join(path)
-            .canonicalize()
-            .expect("Failed to canonicalize path"),
-    );
+    let directory = base
+        .join(path)
+        .canonicalize()
+        .expect("Failed to canonicalize path");
 
-    let children = read_dir(&directory.0);
+    let directory_str = directory.to_str().expect("Failed to convert OsStr to str");
+
+    let children = read_dir(&directory);
 
     quote! {
         ::embed::Dir {
-            children: #children,
-            path: #directory,
+            __children: #children,
+            __path: ::std::borrow::Cow::Borrowed(#directory_str),
         }
     }
 }
 
-fn read_dir(directory: &PathBuf) -> TokenVec {
+fn read_dir(directory: &Path) -> TokenVec {
     let mut entries = Vec::new();
 
     for entry in fs::read_dir(directory).expect("Failed to list directory contents") {
         let entry = entry.expect("Failed to read entry");
 
-        let path = PathBuf2(entry.path());
+        let path = entry.path();
 
-        let filetype = fs::metadata(&path.0)
+        let path_str = path
+            .to_str()
+            .expect("Failed to get the string representation of PathBuf");
+
+        let filetype = fs::metadata(&path)
             .expect("Failed to get file metadata")
             .file_type();
 
         if filetype.is_dir() {
-            let children = read_dir(&path.0);
+            let children = read_dir(&path);
 
             entries.push(quote! {
                 ::embed::DirEntry::Dir(::embed::Dir {
-                    children: #children,
-                    path: #path,
+                    __children: #children,
+                    __path: ::std::borrow::Cow::Borrowed(#path_str),
                 })
             });
         } else if filetype.is_file() {
-            let path_str = path
-                .0
-                .to_str()
-                .expect("Failed to get the string representation of PathBuf");
-
             entries.push(quote! {
                 ::embed::DirEntry::File(::embed::File {
-                    content: ::std::borrow::Cow::Borrowed(include_bytes!(#path_str)),
-                    path: #path,
+                    __content: ::std::borrow::Cow::Borrowed(include_bytes!(#path_str)),
+                    __path: ::std::borrow::Cow::Borrowed(#path_str),
                 })
             });
         }

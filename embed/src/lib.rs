@@ -86,17 +86,28 @@ pub enum DirEntry {
 #[derive(Debug, Clone)]
 pub struct Dir {
     /// The entries the directory houses.
-    pub children: Cow<'static, [DirEntry]>,
+    pub __children: Cow<'static, [DirEntry]>,
     /// The absolute path of the directory.
-    pub path: Cow<'static, Path>,
+    pub __path: Cow<'static, str>, /* We are making it a &str because   *
+                                    * include_*! takes a string anyway. */
 }
 
 impl Dir {
+    /// Returns the children of the directory.
+    pub fn children(&self) -> &[DirEntry] {
+        &self.__children
+    }
+
+    /// Returns the path of the directory.
+    pub fn path(&self) -> &Path {
+        Path::new(self.__path.as_ref().into())
+    }
+
     /// Collects all files from the directory into a vector.
     pub fn flatten(self) -> Vec<File> {
         let mut entries = Vec::new();
 
-        for child in self.children.into_owned() {
+        for child in self.__children.into_owned() {
             // TODO: Eliminate allocation.
             match child {
                 DirEntry::File(file) => entries.push(file),
@@ -112,9 +123,21 @@ impl Dir {
 #[derive(Debug, Clone)]
 pub struct File {
     /// The content of the file in bytes.
-    pub content: Cow<'static, [u8]>,
+    pub __content: Cow<'static, [u8]>,
     /// The absolute path of the file.
-    pub path: Cow<'static, Path>,
+    pub __path: Cow<'static, str>,
+}
+
+impl File {
+    /// Returns the content of the file.
+    pub fn content(&self) -> &[u8] {
+        &self.__content
+    }
+
+    /// Returns the path of the file.
+    pub fn path(&self) -> &Path {
+        Path::new(self.__path.as_ref().into())
+    }
 }
 
 fn read_dir(directory: &Path) -> Vec<DirEntry> {
@@ -125,21 +148,30 @@ fn read_dir(directory: &Path) -> Vec<DirEntry> {
 
         let filetype = entry.file_type().expect("Failed to read entry filetype");
 
-        let path = Cow::Owned::<'static, Path>(
-            entry
-                .path()
-                .canonicalize()
-                .expect("Failed to canonicalize path"),
-        );
+        let path = entry
+            .path()
+            .canonicalize()
+            .expect("Failed to canonicalize path");
+
+        let path_str = path
+            .to_str()
+            .expect("Failed to convert OsStr to str")
+            .to_string();
 
         if filetype.is_dir() {
-            let children = Cow::Owned(read_dir(path.as_ref()));
+            let children = read_dir(&path);
 
-            entries.push(DirEntry::Dir(Dir { children, path }))
+            entries.push(DirEntry::Dir(Dir {
+                __children: children.into(),
+                __path: path_str.into(),
+            }))
         } else if filetype.is_file() {
-            let content = Cow::Owned(fs::read(&path).expect("Failed to read file contents"));
+            let content = fs::read(&path).expect("Failed to read file contents");
 
-            entries.push(DirEntry::File(File { content, path }))
+            entries.push(DirEntry::File(File {
+                __content: content.into(),
+                __path: path_str.into(),
+            }))
         }
     }
 
@@ -155,11 +187,16 @@ pub fn __dir_runtime(neighbor: &str, path: &str) -> Dir {
         .canonicalize()
         .expect("Failed to canonicalize path");
 
+    let directory_str = directory
+        .to_str()
+        .expect("Failed to convert OsStr to str")
+        .to_string();
+
     let children = read_dir(&directory);
 
     Dir {
-        children: children.into(),
-        path: directory.into(),
+        __children: children.into(),
+        __path: directory_str.into(),
     }
 }
 
