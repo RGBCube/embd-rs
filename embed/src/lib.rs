@@ -85,9 +85,9 @@ pub enum DirEntry {
 /// A directory.
 #[derive(Debug, Clone)]
 pub struct Dir {
-    /// The entries the directory houses.
+    #[doc(hidden)]
     pub __children: Cow<'static, [DirEntry]>,
-    /// The absolute path of the directory.
+    #[doc(hidden)]
     pub __path: Cow<'static, str>, /* We are making it a &str because   *
                                     * include_*! takes a string anyway. */
 }
@@ -98,7 +98,7 @@ impl Dir {
         &self.__children
     }
 
-    /// Returns the path of the directory.
+    /// Returns the absolute path of the directory.
     pub fn path(&self) -> &Path {
         Path::new(self.__path.as_ref().into())
     }
@@ -122,9 +122,9 @@ impl Dir {
 /// A file.
 #[derive(Debug, Clone)]
 pub struct File {
-    /// The content of the file in bytes.
+    #[doc(hidden)]
     pub __content: Cow<'static, [u8]>,
-    /// The absolute path of the file.
+    #[doc(hidden)]
     pub __path: Cow<'static, str>,
 }
 
@@ -134,7 +134,7 @@ impl File {
         &self.__content
     }
 
-    /// Returns the path of the file.
+    /// Returns the absolute path of the file.
     pub fn path(&self) -> &Path {
         Path::new(self.__path.as_ref().into())
     }
