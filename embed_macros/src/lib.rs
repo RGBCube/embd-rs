@@ -21,9 +21,9 @@ impl ToTokens for TokenVec {
     fn to_tokens(&self, tokens: &mut TokenStream) {
         let inner = &self.0;
 
-        tokens.extend(quote! {{
+        tokens.extend(quote! {
             ::std::borrow::Cow::Borrowed(&[#(#inner),*])
-        }});
+        });
     }
 }
 
