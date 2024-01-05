@@ -29,7 +29,7 @@ macro_rules! string {
     ($path:literal) => {{
         #[cfg(debug_assertions)]
         {
-            ::std::borrow::Cow::Owned(::embed::__string_runtime(file!(), $path))
+            ::std::borrow::Cow::Owned::<'static, str>(::embed::__string_runtime(file!(), $path))
         }
         #[cfg(not(debug_assertions))]
         {
@@ -64,7 +64,7 @@ macro_rules! bytes {
     ($path:literal) => {{
         #[cfg(debug_assertions)]
         {
-            ::std::borrow::Cow::Owned(::embed::__bytes_runtime(file!(), $path))
+            ::std::borrow::Cow::Owned::<'static, [u8]>(::embed::__bytes_runtime(file!(), $path))
         }
         #[cfg(not(debug_assertions))]
         {
