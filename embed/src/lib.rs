@@ -14,14 +14,14 @@ pub fn __string_runtime(neighbor: &str, path: &str) -> String {
     fs::read_to_string(file).expect("Failed to read file")
 }
 
-/// Embed a files contents as a &str on release,
-/// read from the filesystem as a String on debug.
+/// Embed a files contents as a `&str` on release,
+/// read from the filesystem as a `String` on debug.
 ///
 /// # Example
 ///
 /// ```
 /// fn main() {
-///     let content = embed::string!("main.rs");
+///     let content: Cow<'static, str> = embed::string!("main.rs");
 /// }
 /// ```
 #[macro_export]
@@ -48,15 +48,15 @@ pub fn __bytes_runtime(neighbor: &str, path: &str) -> Vec<u8> {
     fs::read(file).expect("Failed to read file")
 }
 
-/// Embed a files contents as a &[u8] on release,
-/// read from the filesystem as a Vec<u8> on debug.
+/// Embed a files contents as a `&[u8]` on release,
+/// read from the filesystem as a `Vec<u8>` on debug.
 ///
 /// # Example
 ///
 /// ```
 /// fn main() {
 ///     // `assets/` is in the same directory as `src/`
-///     let content = embed::string!("../assets/icon.png");
+///     let content: Cow<'static, [u8]> = embed::string!("../assets/icon.png");
 /// }
 /// ```
 #[macro_export]
@@ -80,6 +80,16 @@ pub enum DirEntry {
     Dir(Dir),
     /// A file.
     File(File),
+}
+
+impl DirEntry {
+    /// Returns the absolute path of the entry.
+    pub fn path(&self) -> &Path {
+        match self {
+            DirEntry::File(file) => file.path(),
+            DirEntry::Dir(dir) => dir.path(),
+        }
+    }
 }
 
 /// A directory.
@@ -208,7 +218,7 @@ pub fn __dir_runtime(neighbor: &str, path: &str) -> Dir {
 ///
 /// ```
 /// fn main() {
-///     let content = embed::dir!("../assets");
+///     let content: embed::Dir = embed::dir!("../assets");
 /// }
 /// ```
 pub use embed_macros::__dir as dir;
