@@ -84,7 +84,7 @@ pub enum DirEntry {
 
 impl DirEntry {
     /// Returns the absolute path of the entry.
-    pub fn path(&self) -> &Path {
+    pub fn path(&self) -> &Cow<'_, str> {
         match self {
             DirEntry::File(file) => file.path(),
             DirEntry::Dir(dir) => dir.path(),
@@ -104,13 +104,13 @@ pub struct Dir {
 
 impl Dir {
     /// Returns the children of the directory.
-    pub fn children(&self) -> &'static [DirEntry] {
+    pub fn children(&self) -> &Cow<'_, [DirEntry]> {
         &self.__children
     }
 
     /// Returns the absolute path of the directory.
-    pub fn path(&self) -> &'static Path {
-        Path::new(self.__path.as_ref().into())
+    pub fn path(&self) -> &Cow<'_, str> {
+        &self.__path
     }
 
     /// Collects all files from the directory into a vector.
@@ -140,13 +140,13 @@ pub struct File {
 
 impl File {
     /// Returns the content of the file.
-    pub fn content(&self) -> &'static [u8] {
+    pub fn content(&self) -> &Cow<'_, [u8]> {
         &self.__content
     }
 
     /// Returns the absolute path of the file.
-    pub fn path(&self) -> &'static Path {
-        Path::new(self.__path.as_ref().into())
+    pub fn path(&self) -> &Cow<'_, str> {
+        &self.__path
     }
 }
 
