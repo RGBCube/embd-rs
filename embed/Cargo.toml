@@ -10,4 +10,4 @@ version     = "0.1.0"
 edition     = "2021"
 
 [dependencies]
-embed_macros = { path = "../embed_macros" }
+embed-macros = { path = "../embed-macros" }

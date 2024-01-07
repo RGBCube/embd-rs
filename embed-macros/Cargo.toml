@@ -1,5 +1,5 @@
 [package]
-name        = "embed_macros"
+name        = "embed-macros"
 description = "Read files or directories from the filesystem at runtime on debug, embed on release."
 repository  = "https://github.com/RGBCube/embed-rs"
 license     = "MIT"
