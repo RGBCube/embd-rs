@@ -16,6 +16,3 @@ proc-macro = true
 proc-macro2 = { version = "1", features = [ "span-locations" ] }
 quote       = "1"
 syn         = "2"
-
-[patch.crates-io]
-proc-macro2 = { git = "https://github.com/RGBCube/proc-macro2" }

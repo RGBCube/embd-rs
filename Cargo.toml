@@ -1,2 +1,3 @@
 [workspace]
-members = [ "embed", "embed-macros" ]
+members  = [ "embed", "embed-macros" ]
+resolver = "2"
