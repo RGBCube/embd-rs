@@ -1,4 +1,4 @@
-#![cfg(feature = "procmacro2_semver_exempt")]
+#![cfg(procmacro2_semver_exempt)]
 use std::{
     borrow::Cow,
     fs,
