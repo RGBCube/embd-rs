@@ -1,3 +1,4 @@
+#![cfg(feature = "procmacro2_semver_exempt")]
 use std::{
     borrow::Cow,
     fs,
@@ -21,7 +22,7 @@ pub fn __string_runtime(neighbor: &str, path: &str) -> String {
 ///
 /// ```
 /// fn main() {
-///     let content: Cow<'static, str> = embed::string!("main.rs");
+///     let content: Cow<'static, str> = embd::string!("main.rs");
 /// }
 /// ```
 #[macro_export]
@@ -29,7 +30,7 @@ macro_rules! string {
     ($path:literal) => {{
         #[cfg(debug_assertions)]
         {
-            ::std::borrow::Cow::Owned::<'static, str>(::embed::__string_runtime(file!(), $path))
+            ::std::borrow::Cow::Owned::<'static, str>(::embd::__string_runtime(file!(), $path))
         }
         #[cfg(not(debug_assertions))]
         {
@@ -56,7 +57,7 @@ pub fn __bytes_runtime(neighbor: &str, path: &str) -> Vec<u8> {
 /// ```
 /// fn main() {
 ///     // `assets/` is in the same directory as `src/`
-///     let content: Cow<'static, [u8]> = embed::string!("../assets/icon.png");
+///     let content: Cow<'static, [u8]> = embd::string!("../assets/icon.png");
 /// }
 /// ```
 #[macro_export]
@@ -64,7 +65,7 @@ macro_rules! bytes {
     ($path:literal) => {{
         #[cfg(debug_assertions)]
         {
-            ::std::borrow::Cow::Owned::<'static, [u8]>(::embed::__bytes_runtime(file!(), $path))
+            ::std::borrow::Cow::Owned::<'static, [u8]>(::embd::__bytes_runtime(file!(), $path))
         }
         #[cfg(not(debug_assertions))]
         {
@@ -218,7 +219,7 @@ pub fn __dir_runtime(neighbor: &str, path: &str) -> Dir {
 ///
 /// ```
 /// fn main() {
-///     let content: embed::Dir = embed::dir!("../assets");
+///     let content: embd::Dir = embd::dir!("../assets");
 /// }
 /// ```
-pub use embed_macros::__dir as dir;
+pub use embd_macros::__dir as dir;

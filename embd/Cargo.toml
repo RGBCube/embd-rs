@@ -1,7 +1,7 @@
 [package]
-name        = "embed"
+name        = "embd"
 description = "Read files or directories from the filesystem at runtime on debug, embed on release."
-repository  = "https://github.com/RGBCube/embed-rs"
+repository  = "https://github.com/RGBCube/embd-rs"
 license     = "MIT"
 keywords    = [ "embedding", "files", "debug-optimization", "bundling" ]
 categories  = [ "filesystem" ]
@@ -10,4 +10,4 @@ version     = "0.1.0"
 edition     = "2021"
 
 [dependencies]
-embed-macros = { path = "../embed-macros" }
+embd-macros = "0.1"

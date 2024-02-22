@@ -1,10 +1,10 @@
 *
 
-!embed/
-!embed/src/
+!embd/
+!embd/src/
 
-!embed-macros/
-!embed-macros/src/
+!embd-macros/
+!embd-macros/src/
 
 !.gitignore
 

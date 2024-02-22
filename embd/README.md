@@ -1,19 +1,41 @@
-# embed-rs
+# embd-rs
 
 A super simple file and directory embedding crate,
-that loads files from the filesystem in debug mode,
+that loads files from the filesystem on debug mode,
 allowing for quick edit-and-test cycles without compilation.
 
+It is also super efficient, and does not heap allocate when the
+files are embedded on release mode by utilizing `std::borrow::Cow`.
+
 On release mode it falls back to `include_str!`, `include_bytes!`
-and our own custom `include_dir!` implementation.
+and our own custom `include_dir!`-like implementation.
 
 ## Usage
 
-```rs
-let contents: Cow<'_, str> = embed::string!("path/to/file.txt");
-let bytes: Cow<'_, [u8]> = embed::bytes!("path/to/image.png");
+Add this to your Cargo.toml:
 
-let dir: embed::Dir = embed::dir!("path/to");
+```toml
+[dependencies]
+embd = "0.1"
+```
+
+Then you can use this crate like so:
+
+```rs
+let contents: Cow<'_, str> = embd::string!("path/to/file.txt");
+let bytes: Cow<'_, [u8]> = embd::bytes!("path/to/image.png");
+
+let dir: embd::Dir = embd::dir!("path/to");
+let files: Vec<embd::File> = dir.flatten();
+```
+
+Note that you will need to enable the `procmacro2_semver_exempt` feature
+to use this crate, you can enable it like so, by putting this in
+`.cargo/config.toml` in the project root:
+
+```toml
+[build]
+rustflags = [ "--cfg", "procmacro2_semver_exempt" ]
 ```
 
 ## License

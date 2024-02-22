@@ -1,7 +1,7 @@
-# embed-rs
+# embd-rs
 
 A super simple file and directory embedding crate,
-that loads files from the filesystem in debug mode,
+that loads files from the filesystem on debug mode,
 allowing for quick edit-and-test cycles without compilation.
 
 It is also super efficient, and does not heap allocate when the
@@ -16,24 +16,27 @@ Add this to your Cargo.toml:
 
 ```toml
 [dependencies]
-embed = { git = "https://github.com/RGBCube/embed-rs" }
-
-[patch.crates-io]
-proc-macro2 = { git = "https://github.com/RGBCube/proc-macro2" }
+embd = "0.1"
 ```
 
-Then you can use this crate as so:
+Then you can use this crate like so:
 
 ```rs
-let contents: Cow<'_, str> = embed::string!("path/to/file.txt");
-let bytes: Cow<'_, [u8]> = embed::bytes!("path/to/image.png");
+let contents: Cow<'_, str> = embd::string!("path/to/file.txt");
+let bytes: Cow<'_, [u8]> = embd::bytes!("path/to/image.png");
 
-let dir: embed::Dir = embed::dir!("path/to");
-let files: Vec<embed::File> = dir.flatten();
+let dir: embd::Dir = embd::dir!("path/to");
+let files: Vec<embd::File> = dir.flatten();
 ```
 
-I am not sure what name to publish this
-crate in, lmk if you find a good one.
+Note that you will need to enable the `procmacro2_semver_exempt` feature
+to use this crate, you can enable it like so, by putting this in
+`.cargo/config.toml` in the project root:
+
+```toml
+[build]
+rustflags = [ "--cfg", "procmacro2_semver_exempt" ]
+```
 
 ## License
 

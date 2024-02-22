@@ -1,3 +1,4 @@
+#![cfg(feature = "procmacro2_semver_exempt")]
 use std::{
     fs,
     path::Path,
@@ -52,7 +53,7 @@ pub fn __dir(input: pm1::TokenStream) -> pm1::TokenStream {
 
 fn dir_debug(path: &str) -> TokenStream {
     quote! {
-        ::embed::__dir_runtime(file!(), #path)
+        ::embd::__dir_runtime(file!(), #path)
     }
 }
 
@@ -71,7 +72,7 @@ fn dir_release(input: TokenStream, path: &str) -> TokenStream {
     let children = read_dir(&directory);
 
     quote! {
-        ::embed::Dir {
+        ::embd::Dir {
             __children: #children,
             __path: ::std::borrow::Cow::Borrowed(#directory_str),
         }
@@ -98,14 +99,14 @@ fn read_dir(directory: &Path) -> TokenVec {
             let children = read_dir(&path);
 
             entries.push(quote! {
-                ::embed::DirEntry::Dir(::embed::Dir {
+                ::embd::DirEntry::Dir(::embd::Dir {
                     __children: #children,
                     __path: ::std::borrow::Cow::Borrowed(#path_str),
                 })
             });
         } else if filetype.is_file() {
             entries.push(quote! {
-                ::embed::DirEntry::File(::embed::File {
+                ::embd::DirEntry::File(::embd::File {
                     __content: ::std::borrow::Cow::Borrowed(include_bytes!(#path_str)),
                     __path: ::std::borrow::Cow::Borrowed(#path_str),
                 })
