@@ -38,6 +38,11 @@ option to use this crate, you can enable it like so, by putting this in
 rustflags = [ "--cfg", "procmacro2_semver_exempt" ]
 ```
 
+## To-Do
+
+- [ ] Hot reloading of files in debug mode.
+- [ ] Don't depend on `procmacro2_semver_exempt`.
+
 ## License
 
 ```
