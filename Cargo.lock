@@ -4,14 +4,16 @@ version = 3
 
 [[package]]
 name = "embd"
-version = "0.1.1"
+version = "0.1.2"
 dependencies = [
- "embd-macros 0.1.1 (registry+https://github.com/rust-lang/crates.io-index)",
+ "embd-macros 0.1.1",
 ]
 
 [[package]]
 name = "embd-macros"
 version = "0.1.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "6d8aff0b18a634834d77cf70effb2ee3f5ab2b4f36f1caa7fabe213ac7767b0f"
 dependencies = [
  "proc-macro2",
  "quote",
@@ -20,9 +22,7 @@ dependencies = [
 
 [[package]]
 name = "embd-macros"
-version = "0.1.1"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "6d8aff0b18a634834d77cf70effb2ee3f5ab2b4f36f1caa7fabe213ac7767b0f"
+version = "0.1.2"
 dependencies = [
  "proc-macro2",
  "quote",
