@@ -1,3 +1,4 @@
+#![allow(unexpected_cfgs)]
 #![cfg(procmacro2_semver_exempt)]
 use std::{
     fs,
