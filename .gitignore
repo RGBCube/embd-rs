@@ -1,5 +1,7 @@
 *
 
+!.cargo/
+
 !embd/
 !embd/src/
 
