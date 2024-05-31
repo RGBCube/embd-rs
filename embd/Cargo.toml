@@ -6,9 +6,12 @@ license     = "MIT"
 keywords    = [ "embedding", "files", "debug-optimization", "bundling" ]
 categories  = [ "filesystem" ]
 authors     = [ "RGBCube" ]
-version     = "0.1.2"
+version     = "0.1.4"
 edition     = "2021"
 include     = [ "src/**/*.rs", "README.md" ]
+
+[package.metadata.docs.rs]
+rustc-args = [ "--cfg", "procmacro2_semver_exempt" ]
 
 [dependencies]
 embd-macros = "0.1"
