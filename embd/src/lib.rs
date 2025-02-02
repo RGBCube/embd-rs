@@ -1,6 +1,8 @@
 #![allow(unexpected_cfgs)]
+
 use std::{
     borrow::Cow,
+    collections::VecDeque,
     fs,
     path::Path,
 };
@@ -64,10 +66,8 @@ pub fn __bytes_runtime(neighbor: &str, path: &str) -> Vec<u8> {
 /// # Example
 ///
 /// ```
-/// fn main() {
-///     // `assets/` is in the same directory as `src/`
-///     let content: Cow<'static, [u8]> = embd::string!("../assets/icon.png");
-/// }
+/// // `assets/` is in the same directory as `src/`
+/// let content: Cow<'static, [u8]> = embd::string!("../assets/icon.png");
 /// ```
 #[macro_export]
 #[cfg(procmacro2_semver_exempt)]
@@ -126,17 +126,19 @@ impl Dir {
 
     /// Collects all files from the directory into a vector.
     pub fn flatten(self) -> Vec<File> {
-        let mut entries = Vec::new();
+        let mut files = Vec::new();
+        let mut dirs = VecDeque::from([self]);
 
-        for child in self.__children.into_owned() {
-            // TODO: Eliminate allocation.
-            match child {
-                DirEntry::File(file) => entries.push(file),
-                DirEntry::Dir(dir) => entries.append(&mut dir.flatten()),
+        while let Some(dir) = dirs.pop_front() {
+            for child in dir.__children.iter().cloned() {
+                match child {
+                    DirEntry::File(file) => files.push(file),
+                    DirEntry::Dir(dir) => dirs.push_back(dir),
+                }
             }
         }
 
-        entries
+        files
     }
 }
 
@@ -228,9 +230,7 @@ pub fn __dir_runtime(neighbor: &str, path: &str) -> Dir {
 /// # Example
 ///
 /// ```
-/// fn main() {
-///     let content: embd::Dir = embd::dir!("../assets");
-/// }
+/// let content: embd::Dir = embd::dir!("../assets");
 /// ```
 #[cfg(procmacro2_semver_exempt)]
 pub use embd_macros::__dir as dir;

@@ -74,7 +74,7 @@ fn dir_debug(path: &str) -> TokenStream {
 
 #[cfg(procmacro2_semver_exempt)]
 fn dir_release(input: TokenStream, path: &str) -> TokenStream {
-    let neighbor = TokenStream::from(input).span().source_file().path();
+    let neighbor = input.span().source_file().path();
 
     let base = neighbor.parent().expect("Failed to get the parent of file");
 
