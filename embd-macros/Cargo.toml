@@ -6,7 +6,7 @@ license     = "MIT"
 keywords    = [ "embedding", "files", "debug-optimization", "bundling" ]
 categories  = [ "filesystem" ]
 authors     = [ "RGBCube" ]
-version     = "0.1.4"
+version     = "0.1.5"
 edition     = "2021"
 include     = [ "src/**/*.rs", "../README.md" ]
 
