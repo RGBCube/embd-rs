@@ -31,9 +31,7 @@ pub fn __string_runtime(neighbor: &str, path: &str) -> String {
 /// # Example
 ///
 /// ```
-/// fn main() {
-///     let content: Cow<'static, str> = embd::string!("main.rs");
-/// }
+/// let content: Cow<'static, str> = embd::string!("main.rs");
 /// ```
 #[macro_export]
 #[cfg(procmacro2_semver_exempt)]
