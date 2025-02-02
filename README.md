@@ -29,19 +29,9 @@ let dir: embd::Dir = embd::dir!("path/to");
 let files: Vec<embd::File> = dir.flatten();
 ```
 
-Note that you will need to enable the `procmacro2_semver_exempt` cfg
-option to use this crate, you can enable it like so, by putting this in
-`.cargo/config.toml` in the project root:
-
-```toml
-[build]
-rustflags = [ "--cfg", "procmacro2_semver_exempt" ]
-```
-
 ## To-Do
 
 - [ ] Hot reloading of files in debug mode.
-- [ ] Don't depend on `procmacro2_semver_exempt`.
 
 ## License
 

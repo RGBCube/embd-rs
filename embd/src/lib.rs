@@ -5,16 +5,6 @@ use std::{
     path::Path,
 };
 
-#[cfg(not(procmacro2_semver_exempt))]
-compile_error!(
-    r#"pass `--cfg procmacro2_semver_exempt` to rustc to compile embd or add this to your `.cargo/config.toml`:
-
-[build]
-rustflags = [ "--cfg", "procmacro2_semver_exempt" ]
-
-"#
-);
-
 #[doc(hidden)]
 pub fn __string_runtime(neighbor: &str, path: &str) -> String {
     let file = Path::new(neighbor)
@@ -34,7 +24,6 @@ pub fn __string_runtime(neighbor: &str, path: &str) -> String {
 /// let content: Cow<'static, str> = embd::string!("main.rs");
 /// ```
 #[macro_export]
-#[cfg(procmacro2_semver_exempt)]
 macro_rules! string {
     ($path:literal) => {{
         #[cfg(debug_assertions)]
@@ -70,7 +59,6 @@ pub fn __bytes_runtime(neighbor: &str, path: &str) -> Vec<u8> {
 /// }
 /// ```
 #[macro_export]
-#[cfg(procmacro2_semver_exempt)]
 macro_rules! bytes {
     ($path:literal) => {{
         #[cfg(debug_assertions)]
@@ -232,5 +220,4 @@ pub fn __dir_runtime(neighbor: &str, path: &str) -> Dir {
 ///     let content: embd::Dir = embd::dir!("../assets");
 /// }
 /// ```
-#[cfg(procmacro2_semver_exempt)]
 pub use embd_macros::__dir as dir;

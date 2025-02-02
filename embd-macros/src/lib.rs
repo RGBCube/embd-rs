@@ -1,28 +1,15 @@
 #![allow(unexpected_cfgs)]
-#[cfg(procmacro2_semver_exempt)]
 use std::{
     fs,
     path::Path,
 };
 
-#[cfg(not(procmacro2_semver_exempt))]
-compile_error!(
-    r#"pass `--cfg procmacro2_semver_exempt` to rustc to compile embd-macros or add this to your `.cargo/config.toml`:
-
-[build]
-rustflags = [ "--cfg", "procmacro2_semver_exempt" ]
-
-"#
-);
-
-#[cfg(procmacro2_semver_exempt)]
 use proc_macro as pm1;
 use proc_macro2::TokenStream;
 use quote::{
     quote,
     ToTokens,
 };
-#[cfg(procmacro2_semver_exempt)]
 use syn::{
     parse_macro_input,
     spanned::Spanned,
@@ -42,7 +29,6 @@ impl ToTokens for TokenVec {
 }
 
 #[proc_macro]
-#[cfg(procmacro2_semver_exempt)]
 pub fn __dir(input: pm1::TokenStream) -> pm1::TokenStream {
     let input2 = input.clone();
     let path = parse_macro_input!(input2 as LitStr).value();
@@ -65,14 +51,12 @@ pub fn __dir(input: pm1::TokenStream) -> pm1::TokenStream {
     .into()
 }
 
-#[cfg(procmacro2_semver_exempt)]
 fn dir_debug(path: &str) -> TokenStream {
     quote! {
         ::embd::__dir_runtime(file!(), #path)
     }
 }
 
-#[cfg(procmacro2_semver_exempt)]
 fn dir_release(input: TokenStream, path: &str) -> TokenStream {
     let neighbor = TokenStream::from(input).span().source_file().path();
 
@@ -95,7 +79,6 @@ fn dir_release(input: TokenStream, path: &str) -> TokenStream {
     }
 }
 
-#[cfg(procmacro2_semver_exempt)]
 fn read_dir(directory: &Path) -> TokenVec {
     let mut entries = Vec::new();
 

@@ -8,10 +8,7 @@ categories  = [ "filesystem" ]
 authors     = [ "RGBCube" ]
 version     = "0.1.4"
 edition     = "2021"
-include     = [ "src/**/*.rs", "README.md" ]
-
-[package.metadata.docs.rs]
-rustc-args = [ "--cfg", "procmacro2_semver_exempt" ]
+include     = [ "src/**/*.rs", "../README.md" ]
 
 [lib]
 proc-macro = true
