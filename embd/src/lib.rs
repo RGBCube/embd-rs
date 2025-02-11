@@ -171,15 +171,9 @@ fn read_dir(directory: &Path) -> Vec<DirEntry> {
 
         let filetype = entry.file_type().expect("Failed to read entry filetype");
 
-        let path = entry
-            .path()
-            .canonicalize()
-            .expect("Failed to canonicalize path");
+        let path = entry.path().canonicalize().expect("Failed to canonicalize path");
 
-        let path_str = path
-            .to_str()
-            .expect("Failed to convert OsStr to str")
-            .to_string();
+        let path_str = path.to_str().expect("Failed to convert OsStr to str").to_string();
 
         if filetype.is_dir() {
             let children = read_dir(&path);
@@ -210,10 +204,7 @@ pub fn __dir_runtime(neighbor: &str, path: &str) -> Dir {
         .canonicalize()
         .expect("Failed to canonicalize path");
 
-    let directory_str = directory
-        .to_str()
-        .expect("Failed to convert OsStr to str")
-        .to_string();
+    let directory_str = directory.to_str().expect("Failed to convert OsStr to str").to_string();
 
     let children = read_dir(&directory);
 

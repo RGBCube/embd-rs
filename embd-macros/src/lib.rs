@@ -78,10 +78,7 @@ fn dir_release(input: TokenStream, path: &str) -> TokenStream {
 
     let base = neighbor.parent().expect("Failed to get the parent of file");
 
-    let directory = base
-        .join(path)
-        .canonicalize()
-        .expect("Failed to canonicalize path");
+    let directory = base.join(path).canonicalize().expect("Failed to canonicalize path");
 
     let directory_str = directory.to_str().expect("Failed to convert OsStr to str");
 
@@ -108,9 +105,7 @@ fn read_dir(directory: &Path) -> TokenVec {
             .to_str()
             .expect("Failed to get the string representation of PathBuf");
 
-        let filetype = fs::metadata(&path)
-            .expect("Failed to get file metadata")
-            .file_type();
+        let filetype = fs::metadata(&path).expect("Failed to get file metadata").file_type();
 
         if filetype.is_dir() {
             let children = read_dir(&path);

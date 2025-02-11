@@ -1,17 +1,17 @@
 [package]
-name        = "embd"
+name = "embd"
 description = "Read files or directories from the filesystem at runtime on debug, embed on release."
-repository  = "https://github.com/RGBCube/embd-rs"
-license     = "MIT"
-keywords    = [ "embedding", "files", "debug-optimization", "bundling" ]
-categories  = [ "filesystem" ]
-authors     = [ "RGBCube" ]
-version     = "0.1.5"
-edition     = "2021"
-include     = [ "src/**/*.rs", "../README.md" ]
+repository = "https://github.com/RGBCube/embd-rs"
+license = "MIT"
+keywords = ["embedding", "files", "debug-optimization", "bundling"]
+categories = ["filesystem"]
+authors = ["RGBCube"]
+version = "0.1.5"
+edition = "2021"
+include = ["src/**/*.rs", "../README.md"]
 
 [package.metadata.docs.rs]
-rustc-args = [ "--cfg", "procmacro2_semver_exempt" ]
+rustc-args = ["--cfg", "procmacro2_semver_exempt"]
 
 [dependencies]
 embd-macros = "0.1"
